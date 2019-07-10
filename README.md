@@ -12,11 +12,12 @@
 3. 将打包的可执行文件放到项目中，路径配置到printService.js文件的downloadUrl，用户可通过路径下载打印控件；
 4. 用户下载运行，即可使用网页提供的打印服务；
 #### 另外
-可以不打包exe，使用batch或shell命令执行jar文件。batch示例如下：
+测试时可以不打包exe，使用batch或shell命令执行jar文件。batch示例如下：
 ```
 rem print-netty-1.0-SNAPSHOT.jar文件和jre1.8.0_201文件夹在同一路径下；命令也在该路径下执行
 jre1.8.0_201\bin\java -Dfile.encoding=utf-8 -Xms5m -Xmx200m -cp print-netty-1.0-SNAPSHOT.jar cn.wangyf.print.main.PrintMain
 ```
+面对普通用户的时候，建议使用exe文件的形式。
 ### 示例
 1. 下载本项目之后，直接用浏览器打开src/test/demo/index.html文件；
 2. 按提示下载，并解压zip文件，运行exe；
