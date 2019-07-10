@@ -32,7 +32,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>cn.wangyf.print.main.IOPrintMain</mainClass>
+                                    <mainClass>cn.wangyf.print.main.PrintMain</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
