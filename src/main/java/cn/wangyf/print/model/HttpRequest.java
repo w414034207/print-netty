@@ -33,7 +33,6 @@ public class HttpRequest {
      * @throws UnsupportedEncodingException 编码异常
      */
     public HttpRequest(FullHttpRequest msg) throws UnsupportedEncodingException {
-        System.out.println(msg);
         this.requestString = msg.toString();
         this.requestMethod = StringUtils.upperCase(msg.method().name());
         this.uri = msg.uri();
