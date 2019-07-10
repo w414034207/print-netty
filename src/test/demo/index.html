@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>打印Demo</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="printService.js?v=0.0.1"></script>
+    <script language="JavaScript">
+        $(function () {
+            initPrinters();
+        });
+        function doPrint() {
+            let printer = $("#printerSelect").val();
+            if (!printer || printer === '') {
+                alert("没有可用的打印机！");
+                return;
+            }
+            printPdf("/print-netty/src/test/demo/demo.pdf", {
+                fileType: 'pdf',
+                printer: printer,//打印机
+                copies: 1,//打印份数
+                duplex: false,//双面打印
+                preview: false,//预览页面
+                done: function (data) {
+                    if (data === "success") {
+                        alert("打印成功");
+                    } else {
+                        alert("打印失败");
+                    }
+                }
+            });
+        }
+        /** 初始化打印机下拉框 */
+        function initPrinters() {
+            // 获取打印机列表
+            getPrinters(function (printers) {
+                for (let i = 0; i < printers.length; i++) {
+                    let printer = printers[i];
+                    $("#printerSelect").append("<option value='" + printer + "'>" + printer + "</option>");
+                }
+                // 获取默认打印机
+                getDefaultPrinter(function (printer) {
+                    $("option[value='" + printer + "']").text(printer + "（默认）");
+                    $("#printerSelect").val(printer);
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+<div>
+    <select id="printerSelect" style="width: 200px;height: 30px;"></select>
+    <input type="button" value="打印" onclick="doPrint();"/>
+</div>
+</body>
+</html>
