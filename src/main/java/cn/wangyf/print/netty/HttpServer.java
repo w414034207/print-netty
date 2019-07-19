@@ -28,18 +28,14 @@ public class HttpServer {
         // 创建EventLoopGroup
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        // 创建EventLoopGroup
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 //指定所使用的NIO传输Channel
                 .channel(NioServerSocketChannel.class)
                 //使用指定的端口设置套接字地址
                 .localAddress(new InetSocketAddress(PORT))
-                // 添加一个EchoServerHandler到Channle的ChannelPipeline
+                // 添加Handler到Channle的ChannelPipeline
                 .childHandler(new ChannelInitializer<SocketChannel>() {
-                    /**
-                     * 初始化channel
-                     */
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
                         // 获取管道
@@ -48,18 +44,12 @@ public class HttpServer {
                                 .addLast(new HttpRequestDecoder())
                                 // 编码
                                 .addLast(new HttpResponseEncoder())
-                                /* aggregator，消息聚合器（重要）。
-                                Netty4中为什么能有FullHttpRequest这个东西，
-                                就是因为有他，HttpObjectAggregator，如果没有他，
-                                就不会有那个消息是FullHttpRequest的那段Channel，
-                                同样也不会有FullHttpResponse，HttpObjectAggregator(512 * 1024)的参数含义是消息合并的数据大小，
-                                如此代表聚合的消息内容长度不超过512kb。*/
+                                /* aggregator，消息聚合器*/
                                 .addLast(new HttpObjectAggregator(512 * 1024))
-                                //EchoServerHandler被标注为@shareable,所以我们可以总是使用同样的案例
-                                .addLast(httpHandler); // 请求的业务类
+                                //HttpHandler被标注为@shareable,所以我们可以总是使用同样的案例
+                                .addLast(httpHandler);
                     }
                 });
-
         try {
             // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
             ChannelFuture f = b.bind().sync();
@@ -68,7 +58,7 @@ public class HttpServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            // 优雅的关闭EventLoopGroup，释放所有的资源
+            // 关闭EventLoopGroup，释放所有的资源
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

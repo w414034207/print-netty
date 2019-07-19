@@ -11,9 +11,7 @@ import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.Finishings;
-import javax.print.attribute.standard.Sides;
+import javax.print.attribute.standard.*;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.*;
@@ -41,7 +39,10 @@ public class ThePrintService {
         // 查找所有的可用的打印服务
         PrintService[] printServices = PrinterJob.lookupPrintServices();
         for (PrintService printService : printServices) {
-            printServiceMap.put(printService.getName(), printService);
+            // 能提供服务的打印机
+            if (printService.getAttribute(PrinterIsAcceptingJobs.class) != PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
+                printServiceMap.put(printService.getName(), printService);
+            }
         }
     }
 
@@ -70,24 +71,28 @@ public class ThePrintService {
         }
         PrintService printer = printServiceMap.get(userConfigs.getPrinter());
         List<String> urlList = userConfigs.getUrls();
+        if (printer == null) {
+            throw new IOException("没有对应的打印服务");
+        }
         if (CollectionUtils.isEmpty(urlList)) {
             throw new IOException("没有可打印的内容");
+        }
+        if (printer.getAttribute(PrinterIsAcceptingJobs.class) == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
+            throw new PrinterException("打印机不可用");
         }
 
         LinkedBlockingQueue<byte[]> documentsByte = new LinkedBlockingQueue<>();
         documentsByte = downloadAllDocument(urlList, documentsByte);
-        byte[] fileByte = documentsByte.poll();
+        byte[] fileByte;
         // 都下载结束，没问题，开始打印
-        while (fileByte != null) {
-            PrinterJob printerJob = PrinterJob.getPrinterJob();
+        PrinterJob printerJob = PrinterJob.getPrinterJob();
+        printerJob.setPrintService(printer);
+        while ((fileByte = documentsByte.poll()) != null) {
             try (PDDocument document = PDDocument.load(fileByte)) {
                 printerJob.setPageable(new PDFPageable(document));
-                printerJob.setPrintService(printer);
                 printerJob.print(attr);
             }
-            fileByte = documentsByte.poll();
         }
-
         return "success";
     }
 
