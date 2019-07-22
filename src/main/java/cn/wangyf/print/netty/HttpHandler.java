@@ -7,7 +7,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.util.AsciiString;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,8 +21,6 @@ import java.lang.reflect.Method;
 @ChannelHandler.Sharable
 public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private AsciiString contentType = HttpHeaderValues.TEXT_PLAIN;
-
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
 
@@ -31,7 +28,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         HttpHeaders heads = response.headers();
         // 返回内容的MIME类型
-        heads.add(HttpHeaderNames.CONTENT_TYPE, contentType + "; charset=UTF-8");
+        heads.add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN + "; charset=UTF-8");
         // 响应体的长度
         heads.add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         // 允许跨域访问
@@ -55,12 +52,21 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (null != cause)
+        if (null != cause) {
             cause.printStackTrace();
-        if (null != ctx)
+        }
+        if (null != ctx) {
             ctx.close();
+        }
     }
 
+    /**
+     * 处理请求，返回应答
+     *
+     * @param msg 请求信息
+     * @return 应答信息
+     * @throws UnsupportedEncodingException
+     */
     private DefaultFullHttpResponse executeRequest(FullHttpRequest msg) throws UnsupportedEncodingException {
         HttpResponseStatus responseStatus = HttpResponseStatus.OK;
         String returnMsg = "";

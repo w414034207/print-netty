@@ -44,9 +44,9 @@ public class HttpServer {
                                 .addLast(new HttpRequestDecoder())
                                 // 编码
                                 .addLast(new HttpResponseEncoder())
-                                /* aggregator，消息聚合器*/
+                                /* aggregator，消息聚合器 */
                                 .addLast(new HttpObjectAggregator(512 * 1024))
-                                //HttpHandler被标注为@shareable,所以我们可以总是使用同样的案例
+                                // HttpHandler被标注为@shareable,所以我们可以总是使用同样的案例
                                 .addLast(httpHandler);
                     }
                 });
@@ -63,6 +63,4 @@ public class HttpServer {
             workerGroup.shutdownGracefully();
         }
     }
-
-
 }
