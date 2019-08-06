@@ -9,8 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 
 import java.net.InetSocketAddress;
 
@@ -40,12 +39,10 @@ public class HttpServer {
                     protected void initChannel(SocketChannel socketChannel) {
                         // 获取管道
                         socketChannel.pipeline()
-                                // 解码
-                                .addLast(new HttpRequestDecoder())
-                                // 编码
-                                .addLast(new HttpResponseEncoder())
-                                /* aggregator，消息聚合器 */
-                                .addLast(new HttpObjectAggregator(512 * 1024))
+                                // 解码编码
+                                .addLast(new HttpServerCodec())
+                                /* aggregator，消息聚合器，处理POST请求的消息 */
+                                .addLast(new HttpObjectAggregator(1024 * 1024))
                                 // HttpHandler被标注为@shareable,所以我们可以总是使用同样的案例
                                 .addLast(httpHandler);
                     }

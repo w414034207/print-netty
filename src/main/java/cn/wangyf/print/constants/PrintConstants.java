@@ -1,5 +1,7 @@
 package cn.wangyf.print.constants;
 
+import org.apache.commons.lang.CharEncoding;
+
 /**
  * 常量定义
  *
@@ -9,9 +11,6 @@ package cn.wangyf.print.constants;
 public class PrintConstants {
     /** 服务端口 */
     public static final int SERVER_PORT = 31777;
-    /** 请求方式 */
-    public static final String METHOD_GET = "GET";
-    public static final String METHOD_POST = "POST";
     /** 系统默认编码 */
-    public static final String DEFAULT_ENCODING = "UTF-8";
+    public static final String DEFAULT_ENCODING = CharEncoding.UTF_8;
 }

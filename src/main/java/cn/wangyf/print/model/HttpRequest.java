@@ -2,13 +2,13 @@ package cn.wangyf.print.model;
 
 import cn.wangyf.print.constants.PrintConstants;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.*;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,52 +34,37 @@ public class HttpRequest {
      */
     public HttpRequest(FullHttpRequest msg) throws UnsupportedEncodingException {
         this.requestString = msg.toString();
-        this.requestMethod = StringUtils.upperCase(msg.method().name());
+        HttpMethod method = msg.method();
+        this.requestMethod = StringUtils.upperCase(method.name());
         this.uri = msg.uri();
 
-        // 接收请求内容并打印
-        ByteBuf byteBuf = msg.content();
-        byte[] bytes = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(bytes);
-        String requestStr = new String(bytes, PrintConstants.DEFAULT_ENCODING);
+        QueryStringDecoder uriDecoder = new QueryStringDecoder(uri);
+        this.method = uriDecoder.path().substring(1);
 
-        int methodIndex = uri.lastIndexOf("/");
-        int paramIndex = uri.indexOf("?");
-        if (paramIndex >= 0) {
-            method = uri.substring(methodIndex + 1, paramIndex);
-        } else {
-            method = uri.substring(methodIndex + 1);
-        }
+        if (method.equals(HttpMethod.GET)) {
+            parameter = convertParam(uriDecoder.parameters());
+        } else if (method.equals(HttpMethod.POST)) {
+            // 请求内容
+            ByteBuf byteBuf = msg.content();
+            byte[] bytes = new byte[byteBuf.readableBytes()];
+            byteBuf.readBytes(bytes);
+            String requestStr = new String(bytes, PrintConstants.DEFAULT_ENCODING);
 
-        if (StringUtils.equals(requestMethod, PrintConstants.METHOD_GET)) {
-            if (paramIndex >= 0) {
-                String params = uri.substring(paramIndex + 1);
-                parameter = convertParam(params);
-            }
-        } else if (StringUtils.equals(requestMethod, PrintConstants.METHOD_POST)) {
-            Map<String, String> paramMap = convertParam(requestStr);
             parameter = new HashMap<>();
-            paramMap.keySet().forEach((key) -> {
-                try {
-                    parameter.put(urlDecode(key), urlDecode(paramMap.get(key)));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+            String contentType = StringUtils.lowerCase(msg.headers().get(HttpHeaderNames.CONTENT_TYPE));
+            if (StringUtils.startsWith(contentType, HttpHeaderValues.APPLICATION_JSON.toString())) {
+                JSONObject obj = JSONObject.fromObject(requestStr);
+                for (Object key : obj.keySet()) {
+                    parameter.put(key.toString(), obj.get(key).toString());
                 }
-            });
+            } else if (StringUtils.startsWith(contentType, HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString())) {
+                QueryStringDecoder contentDecoder = new QueryStringDecoder(requestStr, false);
+                parameter = convertParam(contentDecoder.parameters());
+            }
+
             this.origin = Optional.ofNullable(msg.headers().get(HttpHeaderNames.ORIGIN))
                     .filter(str -> !StringUtils.equals(str, "null")).orElse("");
         }
-    }
-
-    /**
-     * url解码
-     *
-     * @param str 字符串
-     * @return 解码后的字符串
-     * @throws UnsupportedEncodingException 编码异常
-     */
-    private String urlDecode(String str) throws UnsupportedEncodingException {
-        return URLDecoder.decode(StringUtils.trim(str), PrintConstants.DEFAULT_ENCODING);
     }
 
     /**
@@ -88,15 +73,12 @@ public class HttpRequest {
      * @param paramStr 字符串
      * @return 参数键值对
      */
-    private static Map<String, String> convertParam(String paramStr) {
-        Map<String, String> param = new HashMap<>(10);
-        if (StringUtils.isEmpty(paramStr)) {
-            return param;
-        }
-        String[] paramArr = paramStr.split("&");
-        for (String paramItem : paramArr) {
-            String[] paramItemArr = paramItem.split("=");
-            param.put(StringUtils.trim(paramItemArr[0]), StringUtils.trim(paramItemArr[1]));
+    private static Map<String, String> convertParam(Map<String, List<String>> paramStr) {
+        Map<String, String> param = new HashMap<>(20);
+        for (Map.Entry<String, List<String>> attr : paramStr.entrySet()) {
+            for (String attrVal : attr.getValue()) {
+                param.put(attr.getKey(), attrVal);
+            }
         }
         return param;
     }
