@@ -39,7 +39,7 @@ public class HttpServer {
                     protected void initChannel(SocketChannel socketChannel) {
                         // 获取管道
                         socketChannel.pipeline()
-                                // 解码编码
+                                // 解码+编码
                                 .addLast(new HttpServerCodec())
                                 /* aggregator，消息聚合器，处理POST请求的消息 */
                                 .addLast(new HttpObjectAggregator(1024 * 1024))
