@@ -76,9 +76,7 @@ public class HttpRequest {
     private static Map<String, String> convertParam(Map<String, List<String>> paramStr) {
         Map<String, String> param = new HashMap<>(20);
         for (Map.Entry<String, List<String>> attr : paramStr.entrySet()) {
-            for (String attrVal : attr.getValue()) {
-                param.put(attr.getKey(), attrVal);
-            }
+            param.put(attr.getKey(), attr.getValue().get(0));
         }
         return param;
     }
