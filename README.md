@@ -14,7 +14,7 @@
 4. 用户下载运行，即可使用网页提供的打印服务；
 #### 另外
 也可以不打包exe，使用batch或shell命令执行jar文件。batch示例如下：
-```
+```batch
 rem print-netty-1.0-SNAPSHOT.jar文件和jre1.8.0_25文件夹在同一路径下；命令也在该路径下执行
 jre1.8.0_25\bin\java -Dfile.encoding=utf-8 -Xms5m -Xmx200m -cp print-netty-1.0-SNAPSHOT.jar cn.wangyf.print.main.PrintMain
 ```
@@ -23,3 +23,8 @@ jre1.8.0_25\bin\java -Dfile.encoding=utf-8 -Xms5m -Xmx200m -cp print-netty-1.0-S
 1. 下载本项目之后，直接用浏览器打开src/test/demo/index.html文件；
 2. 按提示下载，并解压zip文件，运行exe；
 3. 刷新页面即可看到打印机列表，选择打印机进行打印。
+### 20220823更新
+1. 支持纵向打印参数；
+2. 打印多份时，逐份打印；
+3. 去掉不可用打印机的判断；
+4. 文件地址url同时支持绝对路径和相对路径。

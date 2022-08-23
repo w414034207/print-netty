@@ -30,6 +30,7 @@ function printPdf(url, config) {
             , 'copies': config.copies
             , 'duplex': config.duplex
             , 'url': url
+            , 'portrait': config.portrait
         },
         url: printServerAddress + "printPdf?_m=" + Math.random(),
         success: config.done

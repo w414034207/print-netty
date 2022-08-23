@@ -39,10 +39,7 @@ public class ThePrintService {
         // 查找所有的可用的打印服务
         PrintService[] printServices = PrinterJob.lookupPrintServices();
         for (PrintService printService : printServices) {
-            // 能提供服务的打印机
-            if (printService.getAttribute(PrinterIsAcceptingJobs.class) != PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
-                printServiceMap.put(printService.getName(), printService);
-            }
+            printServiceMap.put(printService.getName(), printService);
         }
     }
 
@@ -69,6 +66,16 @@ public class ThePrintService {
         if (printServiceMap == null) {
             initPrinters();
         }
+        if (!userConfigs.isPortrait()) {
+            // 横向打印
+            attr.add(OrientationRequested.LANDSCAPE);
+        }
+        // 逐份打印
+        attr.add(SheetCollate.COLLATED);
+
+        if (printServiceMap == null) {
+            initPrinters();
+        }
         PrintService printer = printServiceMap.get(userConfigs.getPrinter());
         List<String> urlList = userConfigs.getUrls();
         if (printer == null) {
@@ -76,9 +83,6 @@ public class ThePrintService {
         }
         if (CollectionUtils.isEmpty(urlList)) {
             throw new IOException("没有可打印的内容");
-        }
-        if (printer.getAttribute(PrinterIsAcceptingJobs.class) == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
-            throw new PrinterException("打印机不可用");
         }
 
         LinkedBlockingQueue<byte[]> documentsByte = new LinkedBlockingQueue<>();
@@ -125,6 +129,7 @@ public class ThePrintService {
                 }
             });
         }
+        executorService.shutdown();
         // 等待计数器计数
         count.await();
         long endTime = System.currentTimeMillis();

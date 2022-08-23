@@ -13,9 +13,14 @@ import java.util.List;
  */
 public class PrintConfigs {
     private List<String> urls;
+    /** 打印机 */
     private String printer;
+    /** 打印份数 */
     private int copies;
+    /** 双面打印 */
     private boolean duplex;
+    /** 纵向打印 */
+    private boolean portrait;
 
     public List<String> getUrls() {
         return urls;
@@ -27,7 +32,8 @@ public class PrintConfigs {
         for (String url : urlArr) {
             url = StringUtils.trim(url);
             if (StringUtils.isNotEmpty(url)) {
-                if (StringUtils.isNotEmpty(origin)) {
+                // 如果url不是以http(s)://开头，并且origin不为空的，认为是相对路径，增加origin
+                if (StringUtils.isNotEmpty(origin) && !url.startsWith("http://") && !url.startsWith("https://")) {
                     url = origin + url;
                 }
                 urls.add(url);
@@ -57,5 +63,13 @@ public class PrintConfigs {
 
     public void setDuplex(boolean duplex) {
         this.duplex = duplex;
+    }
+
+    public boolean isPortrait() {
+        return portrait;
+    }
+
+    public void setPortrait(boolean portrait) {
+        this.portrait = portrait;
     }
 }
