@@ -35,6 +35,7 @@ public class PrintController {
             PrintConfigs config = new PrintConfigs();
             config.setCopies(Integer.parseInt(request.getParameter().get("copies")));
             config.setDuplex(Boolean.parseBoolean(request.getParameter().get("duplex")));
+            config.setPortrait(Boolean.parseBoolean(request.getParameter().get("portrait")));
             config.setPrinter(request.getParameter().get("printer"));
             config.setUrls(request.getOrigin(), request.getParameter().get("url"));
             return thePrintService.printPdf(config);
